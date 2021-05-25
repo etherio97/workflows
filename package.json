@@ -1,0 +1,9 @@
+{
+  "name": "gh-workflows-cron-test",
+  "description": "Github CI/CD Cron Job Test",
+  "version": "0.0.1-alpha",
+  "private": true,
+  "main": "app.js",
+  "dependencies": { },
+  "devDependencies": { }
+}
