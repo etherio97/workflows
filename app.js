@@ -5,8 +5,26 @@ console.log("[JOB] STARTED: ", new Date().toLocaleString('en-US', {
   timeZone: 'Asia/Yangon',
 }));
 
+const {
+  GITHUB_ACTION,
+  GITHUB_EVENT_NAME,
+  GITHUB_JOB,
+  GITHUB_RUN_ID: 
+  GITHUB_RUN_NUMBER,
+  GITHUB_SHA,
+  GITHUB_WORKFLOW,
+  RUNNER_TRACKING_ID
+} = process.env;
+
 axios.post(ENDPOINT_URL, {
-  ...process.env,
+  GITHUB_ACTION,
+  GITHUB_EVENT_NAME,
+  GITHUB_JOB,
+  GITHUB_RUN_ID: 
+  GITHUB_RUN_NUMBER,
+  GITHUB_SHA,
+  GITHUB_WORKFLOW,
+  RUNNER_TRACKING_ID,
   createdAt: Date.now(),
 }).then(({ data }) => {
   console.log('[JOB] STORED: ', data);
