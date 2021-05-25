@@ -4,6 +4,7 @@
   "version": "0.0.1-alpha",
   "private": true,
   "main": "app.js",
-  "dependencies": { },
-  "devDependencies": { }
+  "dependencies": { 
+    "axios": "^0.21.1"
+  }
 }
