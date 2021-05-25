@@ -6,7 +6,7 @@ console.log("[JOB] STARTED: ", new Date().toLocaleString('en-US', {
 }));
 
 axios.post(ENDPOINT_URL, {
-  ...env,
+  ...process.env,
   createdAt: Date.now(),
 }).then(({ data }) => {
   console.log('[JOB] STORED: ', data);
