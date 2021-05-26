@@ -1,7 +1,5 @@
 class Job {
   constructor({
-    key,
-    GITHUB_ACTION,
     GITHUB_EVENT_NAME,
     GITHUB_JOB,
     GITHUB_RUN_ID,
@@ -10,8 +8,6 @@ class Job {
     GITHUB_WORKFLOW,
     createdAt
   }) {
-    this.key = key;
-    this.GITHUB_ACTION = GITHUB_ACTION;
     this.GITHUB_EVENT_NAME = GITHUB_EVENT_NAME;
     this.GITHUB_JOB = GITHUB_JOB;
     this.GITHUB_RUN_NUMBER = GITHUB_RUN_NUMBER;
