@@ -16,8 +16,3 @@ jobs:
       run: npm install
     - name: Executing "app.js" File
       run: node app.js
-    - run: |
-        echo ----------------------
-        date
-        echo ----------------------
-        echo "RUN:$GITHUB_RUN_NUMBER JOB:$GITHUB_JOB"
