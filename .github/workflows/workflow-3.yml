@@ -1,0 +1,17 @@
+name: CI3
+on:
+#   push:
+  schedule:
+    - cron: "30 2/3 * * *"
+jobs:
+  schedule:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v2
+      with:
+        node-version: 14.16.0
+    - name: Installing Node Dependencies
+      run: npm install
+    - name: Executing "app.js" File
+      run: node app.js
