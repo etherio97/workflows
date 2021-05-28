@@ -2,7 +2,7 @@ name: CI1
 on:
 #   push:
   schedule:
-    - cron: "30 1/3 * * *"
+    - cron: "* * * * *"
 jobs:
   schedule:
     runs-on: ubuntu-latest
