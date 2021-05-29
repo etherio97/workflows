@@ -2,7 +2,7 @@ name: CI8
 on:
 #   push:
   schedule:
-    - cron: "0 3/3 * * *"
+    - cron: "0 * * * *"
 jobs:
   schedule:
     runs-on: ubuntu-latest
