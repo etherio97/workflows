@@ -17,5 +17,5 @@ jobs:
       run: npm install
     - name: Executing "worker/RFA.js" File
       run: |
-        npm run schedule:rfa
-        npm start
+        node works/RFA.js
+        node app.js
