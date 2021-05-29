@@ -4,8 +4,15 @@
   "version": "0.0.1-alpha",
   "private": true,
   "main": "app.js",
+  "script": {
+    "start": "node app.js",
+    "schedule:rfa": "node workers/RFA.js",
+    "schedule:dvb": "node workers/DVB.js",
+    "schedule:voa": "node workers/VOA.js"
+  },
   "dependencies": { 
     "axios": "^0.21.1",
+    "fast-xml-parser": "^3.19.0",
     "jsdom": "^16.6.0",
     "ytdl-core": "^4.8.2"
   }
