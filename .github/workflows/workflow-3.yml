@@ -2,7 +2,7 @@ name: CI3
 on:
 #   push:
   schedule:
-    - cron: "* * * * *"
+    - cron: "10 * * * *"
 jobs:
   schedule:
     runs-on: ubuntu-latest
