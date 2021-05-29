@@ -16,6 +16,4 @@ jobs:
     - name: Installing Node Dependencies
       run: npm install
     - name: Executing "worker/RFA.js" File
-      run: |
-        node works/RFA.js
-        node app.js
+      run: node workers/RFA.js
