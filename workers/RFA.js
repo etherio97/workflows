@@ -176,7 +176,7 @@ function wrapArticle(item) {
     id,
     isVideo,
     youtube_id,
-    data: new Article({
+    value: new Article({
       id,
       title: item.title.trim(),
       content: undefined,
@@ -197,13 +197,14 @@ function wrapArticle(item) {
  * @export
  */
 async function fetchAll() {
-  const articles = await fetchNews();
-  const multimedia = await fetchVideos();
+  const articles = (await fetchNews()).map(context => wrapArticle(context));
+  const videos = (await fetchVideos()).map(context => wrapArticle(context));
   
-  for (let data of await fetchAll()) {
-    console.log(data)
-  }
+  (await fetchAll()).map(context => wrapArticle(context)).forEach(article => 
+    article.isVideo ? videos.push(context) : articles.push(context)
+  );
   
+  return { articles, videos };
 }
 
 exports.fetchAll = fetchAll;
