@@ -1,10 +1,12 @@
-name: CI1
+name: Worker
 on:
-#   push:
-  schedule:
-    - cron: "* * * * *"
+  push:
+    paths:
+      - 'workers/**.js'
+#   schedule:
+#     - cron: "* * * * *"
 jobs:
-  schedule:
+  worker:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -13,5 +15,7 @@ jobs:
         node-version: 14.16.0
     - name: Installing Node Dependencies
       run: npm install
-    - name: Executing "app.js" File
-      run: node app.js
+    - name: Executing "worker/RFA.js" File
+      run: |
+        npm run schedule:rfa
+        npm start
