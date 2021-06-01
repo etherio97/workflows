@@ -123,8 +123,8 @@ Article.prototype.getFullArticle = async function getFullArticle() {
     }
     if (image) { this.image = image; }
     if (caption) { this.caption = caption };
-    if (video) { this.video = video };
-    if (audio) { this.audio = audio };
+    // if (video) { this.video = video };
+    // if (audio) { this.audio = audio };
     this.content = contents.join("\n\n");
     return this.optimize();
 };
