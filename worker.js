@@ -29,7 +29,7 @@ const createArticleMarkdown = (article) => {
         }
         return text;
     };
-    const content 
+    const content = article.content.split("\n\n");
     return `---
 layout: article
 title: ${article.title} - ${article.source}
