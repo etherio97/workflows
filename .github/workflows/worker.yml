@@ -2,6 +2,7 @@ name: Worker
 on:
   push:
     paths:
+      - "worker.js"
       - "workers/**.js"
 #   schedule:
 #     - cron: "* * * * *"
