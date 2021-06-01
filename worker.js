@@ -23,7 +23,7 @@ let started = Date.now();
 const publishCollection = (items) => items.map(item => publish(item));
 const createArticleMarkdown = (article) => {
     const quote = [34, 39, 8220, 8221];
-    const paragraph =  (text) => {
+    const paragraph = (text) => {
         if (text.split('').filter(x => quote.includes(String(x).charCodeAt())).length) {
             return `> ${text}`;
         }
@@ -48,6 +48,7 @@ ${content.map(text => paragraph(text)).join('\n\n')}`;
 const saveMarkdownArticle = (article) => writeFileSync(`_posts/${moment(article.timestamp).tz('Asia/Yangon').format('YYYY-MM-DD')}-${article.id}.md`, createArticleMarkdown(article), 'utf-8');
 
 !async function () {
+    console.log('running RFA Feed');
     await RFA.fetchAll()
         .then(async ({ articles }) => {
             for (let article of articles) {
@@ -58,6 +59,7 @@ const saveMarkdownArticle = (article) => writeFileSync(`_posts/${moment(article.
             console.error(err);
         })
 
+    console.log('running VOA Feed');
     await VOA.fetchAll()
         .then(async ({ articles }) => {
             for (let article of articles) {
@@ -68,8 +70,8 @@ const saveMarkdownArticle = (article) => writeFileSync(`_posts/${moment(article.
         .catch(err => {
             console.error(err);
         });
-        
-        let ended = Date.now() - started;
-        let datetime = new Date().toLocaleString('my-MM', { timeZone: 'Asia/Yangon' });
-        console.log('completed: %ss | %s', (ended / 1000).toFixed(2), datetime);
+
+    let ended = Date.now() - started;
+    let datetime = new Date().toLocaleString('my-MM', { timeZone: 'Asia/Yangon' });
+    console.log('completed: %ss | %s', (ended / 1000).toFixed(2), datetime);
 }();
