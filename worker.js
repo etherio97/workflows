@@ -1,3 +1,4 @@
+const { writeFileSync } = require('fs');
 const moment = require('moment-timezone');
 const VOA = require('./workers/VOA');
 const RFA = require('./workers/RFA');
@@ -20,44 +21,55 @@ const publish = async (article) => {
 }
 let started = Date.now();
 const publishCollection = (items) => items.map(item => publish(item));
-
-VOA.fetchAll()
-    .then(async ({ articles }) => {
-        for (let article of articles) {
-            await article.getFullArticle();
-            const { writeFileSync } = require('fs');
-            const content = article.content.split("\n\n");
-            const time = moment(article.timestamp).tz('Asia/Yangon');
-            const quote = [34, 39, 8220, 8221];
-            const paragraph = (text) => {
-                if (text.split('').filter(x => quote.includes(String(x).charCodeAt())).length) {
-                    return `> ${text}`;
-                }
-                return text;
-            };
-
-            const template = `---
+const createArticleMarkdown = (article) => {
+    const quote = [34, 39, 8220, 8221];
+    const paragraph =  (text) => {
+        if (text.split('').filter(x => quote.includes(String(x).charCodeAt())).length) {
+            return `> ${text}`;
+        }
+        return text;
+    };
+    const content 
+    return `---
 layout: article
 title: ${article.title} - ${article.source}
 ---
 
 ## ${article.title}
 
-[${article.source}](${article.link}) | _${time.format('DD/MM/YYYY')}_
+[${article.source}](${article.link}) | _${moment(article.timestamp).tz('Asia/Yangon').format('DD/MM/YYYY hh:mm A')}_
         
 ![${article.caption || article.title}](${article.image})
 
 _${article.caption || article.title}_
 
 ${content.map(text => paragraph(text)).join('\n\n')}`;
-            writeFileSync(`_posts/${time.format('YYYY-MM-DD')}-${article.id}.md`, template, 'utf-8');
-        }
-    })
-    .catch(err => {
-        console.error(err);
-    })
-    .finally(() => {
+};
+const saveMarkdownArticle = (article) => writeFileSync(`_posts/${moment(article.timestamp).tz('Asia/Yangon').format('YYYY-MM-DD')}-${article.id}.md`, createArticleMarkdown(article), 'utf-8');
+
+!async function () {
+    await RFA.fetchAll()
+        .then(async ({ articles }) => {
+            for (let article of articles) {
+                saveMarkdownArticle(article);
+            }
+        })
+        .catch(err => {
+            console.error(err);
+        })
+
+    await VOA.fetchAll()
+        .then(async ({ articles }) => {
+            for (let article of articles) {
+                await article.getFullArticle();
+                saveMarkdownArticle(article);
+            }
+        })
+        .catch(err => {
+            console.error(err);
+        });
+        
         let ended = Date.now() - started;
         let datetime = new Date().toLocaleString('my-MM', { timeZone: 'Asia/Yangon' });
         console.log('completed: %ss | %s', (ended / 1000).toFixed(2), datetime);
-    });
+}();
