@@ -1,11 +1,7 @@
 const { JSDOM } = require("jsdom");
 const Article = require("./Article");
 const ArticleContent = require("./ArticleContent");
-const {
-  removeWhitespace,
-  publishedDate,
-  getRSSFeed,
-} = require("./helpers");
+const { fetchRSS } = require("./helpers");
 
 const comDetails = {
   name: 'RFA',
@@ -45,7 +41,7 @@ const comDetails = {
  */
 function fetchVideos() {
   let config = comDetails.feeds.find(({ name }) => name === 'videos');
-  return getRSSFeed(config.rss).then(xml => xml.rss.channel);
+  return fetchRSS(config.rss).then(xml => xml.rss.channel);
 }
 
 /**
@@ -56,7 +52,7 @@ function fetchVideos() {
  */
 function fetchNews() {
   let config = comDetails.feeds.find(feed => feed.name === 'news');
-  return getRSSFeed(config.rss).then(xml => xml.rss.channel);
+  return fetchRSS(config.rss).then(xml => xml.rss.channel);
 }
 
 /**
@@ -67,7 +63,7 @@ function fetchNews() {
  */
 function fetchArticles() {
   let config = comDetails.feeds.find(feed => feed.name === 'articles');
-  return getRSSFeed(config.rss).then(xml => xml.rss.channel);
+  return fetchRSS(config.rss).then(xml => xml.rss.channel);
 }
 
 async function fetchAll() {
@@ -86,16 +82,15 @@ async function fetchAll() {
  * @params {!string}
  * @returns {!ArticleContent}
  */
-function createContent(content) {
+function createContent(html) {
   let youtube_id;
-  let { window } = new JSDOM(content);
-  let { document } = window;
+  let { window: { document } } = new JSDOM(html);
   let videoFrame = document.querySelector("iframe");
   if (videoFrame) {
     youtube_id = videoFrame.src.split("/").pop();
     videoFrame.remove();
   }
-  content = removeWhitespace(document.body.textContent);
+  let content = document.body.textContent;
   return new ArticleContent({
     content,
     youtube_id,
@@ -107,39 +102,28 @@ function createContent(content) {
  * @params {!{
  *  object: item
  * }}
- * @returns {!{
- *  string: id,
- *  !Article: value,
- *  boolean: hasVideo,
- *  string?: youtube_id,
- * }}
+ * @returns {!Article}
  */
 function wrapArticle(context) {
   let id = context.guid.text?.split("/").pop().split(".html")[0].match(/(\d+)$/)[1];
   let media = context["media:content"] || {};
   let image = media.attr?.url || comDetails.images.thumbnail;
-  let caption = media['media:description'] && media['media:description'].text;
-  let content = createContent(context["content:encoded"].text);
-
-  return {
+  let caption = media['media:description'] && media['media:description'].text || undefined;
+  let { hasVideo, content, youtube_id } = createContent(context["content:encoded"].text);
+  return new Article({
     id,
-    hasVideo: content.hasVideo,
-    youtube_id: content.youtube_id,
-    value: new Article({
-      id,
-      title: context.title.trim(),
-      content: content.content,
-      image,
-      link: context["link"],
-      source: comDetails.name,
-      timestamp: publishedDate(context.pubDate),
-      caption,
-      video_id: null,
-      message_id: null,
-      photo_id: null,
-      post_id: null,
-    }),
-  };
+    title: context.title,
+    content,
+    image,
+    link: context.link,
+    source: comDetails.name,
+    timestamp: context.pubDate,
+    caption,
+    photo_id: null,
+    post_id: null,
+    video_id: hasVideo ? `https://www.youtube.com/watch?v=${youtube_id}` : null,
+    message_id: null,
+  }).optimize();
 }
 
 exports.fetchAll = fetchAll;
