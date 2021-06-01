@@ -59,7 +59,7 @@ const saveMarkdownArticle = (article) => writeFileSync(`_posts/${moment(article.
             console.error(err);
         })
 
-    console.log('.running VOA Feed');
+    console.log('running VOA Feed');
     await VOA.fetchAll()
         .then(async ({ articles }) => {
             for (let article of articles) {
