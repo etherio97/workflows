@@ -3,6 +3,7 @@ const VOA = require('./workers/VOA');
 const RFA = require('./workers/RFA');
 const {
     exists,
+    publishArticle
 } = require("./workers/helpers");
 
 const publish = async (article) => {
@@ -11,8 +12,7 @@ const publish = async (article) => {
     } else {
         let started = Date.now();
         console.log('[-] publishing article "%s" from "%s"', article.id, article.source);
-        return
-        publish({ article })
+        return publishArticle({ article })
             .then(() => console.log('[o] load time: %dms | SUCCESS:%s', Date.now() - started, id))
             .catch((e) => console.error('[x] load time: %dms | ERROR:%s', Date.now() - started, e.response?.data || e.message))
             .finally(() => console.log());
@@ -53,7 +53,6 @@ _${article.caption || article.title}_
 ${content.map(text => paragraph(text)).join('\n\n')}`;
             writeFileSync(`_posts/${time.format('YYYY-MM-DD')}-${article.id}.md`, template, 'utf-8');
         }
-
     })
     .catch(err => {
         console.error(err);
