@@ -1,0 +1,74 @@
+masthead_title: ""
+title: "Etherio"
+name: &name "Ethereal" # &name is a YAML anchor which can be *referenced later
+description: "Etherio Documentation"
+logo: "./assets/img/logo.png"
+url: "https://docs.etherio.net"
+baseurl: "/"
+repository: "etherio/docs"
+
+encoding: "UTF-8"
+locale: "en-US"
+timezone: "Asia/Yangon" # https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+
+title_separator: "-"
+breadcurmbs: true # false (default), true
+words_per_minute: 200
+
+comments:
+  providers: "staticman" # false (default), "disqus", "facebook", "google-plus", "staticman_v2", "staticman"
+
+staticman:
+  allowedFields: ["name", "email", "message"]
+  branch: "master"
+  commitMessage: # "New Comment"
+  filename: # comment-{@timestamp}
+  format: yml
+  moderation: true
+  path: "_data/comments/{options.slug}"
+  requiredFields: ["name", "email", "message"]
+  transforms:
+    email: # "md5"
+  generateFields:
+    date:
+      type: "date"
+      options:
+        format: # "iso8601" (default), "timestamp-seconds", "timestamp-milliseconds"
+
+atom_feed:
+  path: # blank (default) use feed.xml
+
+search: true # false (default), true
+search_full_content: false # false (default), true
+search_provider: lunr # lunr (default), algolia
+
+# google_site_verification: "{Google-Site-Verification-Id}"
+
+# twitter:
+#  username: ""
+# facebook:
+#  username: ""
+#  app_id:
+#  publisher:
+# og_image: "/docs/assets/images/logo.png"
+
+# analytics:
+#  provider: "google-universal"
+#  google:
+#    track_id: #UA-XXXXXX-X
+
+# include:
+
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - README.md
+  - SECURITY.md
+
+plugins:
+  - jekyll-paginate
+  - jekyll-sitemap
+  - jekyll-feed
+# source:
+
+# destination:
