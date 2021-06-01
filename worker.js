@@ -22,7 +22,7 @@ let started = Date.now();
 const publishCollection = (items) => items.map(item => publish(item));
 
 VOA.fetchAll()
-    .then(async ({ articles, videos }) => {
+    .then(async ({ articles }) => {
         for (let article of articles) {
             await article.getFullArticle();
 
