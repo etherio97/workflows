@@ -8,6 +8,10 @@
     "start": "node worker.js",
     "clean": "rm _posts/*.md"
   },
+  "engines": {
+    "node": "^14.16.0",
+    "yarn": "^1.22.10"
+  },
   "dependencies": {
     "axios": "^0.21.1",
     "fast-xml-parser": "^3.19.0",

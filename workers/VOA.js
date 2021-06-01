@@ -95,9 +95,9 @@ function fetchAMP(url) {
         .then(({ data }) => parseHTML(data));
 }
 
-Article.prototype.getFullArticle = async function fetchFullArticle() {
+Article.prototype.getFullArticle = async function getFullArticle() {
     const contents = [];
-    const { document, HTMLElement } = await fetchAMP(this.link);
+    const { document } = await fetchAMP(this.link);
     let articleEl = document.querySelector('article');
     let image = articleEl.querySelector('amp-img')?.getAttribute('src');
     let caption = articleEl.querySelector('.caption')?.textContent;
@@ -111,7 +111,7 @@ Article.prototype.getFullArticle = async function fetchFullArticle() {
         if (el.className == mediaElem.className) {
             break;
         }
-        if (el.textContent.trim() === article.title) {
+        if (el.textContent.trim() === this.title) {
             break;
         }
         if (i > 2 && el.textContent.includes('Unicode')) {
@@ -128,6 +128,5 @@ Article.prototype.getFullArticle = async function fetchFullArticle() {
     this.content = contents.join("\n\n");
     return this.optimize();
 };
-
 
 exports.fetchAll = fetchAll;

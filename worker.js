@@ -25,7 +25,6 @@ VOA.fetchAll()
     .then(async ({ articles }) => {
         for (let article of articles) {
             await article.getFullArticle();
-
             const { writeFileSync } = require('fs');
             const content = article.content.split("\n\n");
             const time = moment(article.timestamp).tz('Asia/Yangon');
