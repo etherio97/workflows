@@ -22,10 +22,10 @@ jobs:
         run: yarn
       - name: Executing "worker.js"
         run: |
-          node worker.js
           git config user.name worker-runner
           git config user.email etherio97@user.noreply.github.com
           git checkout --orphan gh-page
+          node worker.js
           git add .
           git commit -m "Updated at $(date)"
           git push origin gh-page --force
