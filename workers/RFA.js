@@ -1,12 +1,15 @@
-const { default: axios } = require("axios");
-const { parse } = require("fast-xml-parser");
 const { JSDOM } = require("jsdom");
-
-// "fuse.js": "^6.4.6"
+const Article = require("./Article");
+const ArticleContent = require("./ArticleContent");
+const {
+  removeWhitespace,
+  publishedDate,
+  getRSSFeed,
+} = require("./helpers");
 
 const comDetails = {
   name: 'RFA',
-  fullname: 'RFA လွတ်လပ်တဲ့အာရှအသံ',
+  title: 'RFA လွတ်လပ်တဲ့အာရှအသံ',
   homepage: 'https://www.rfa.org/burmese',
   images: {
     logo: 'https://www.nweoo.com/images/logo/rfa.png',
@@ -17,7 +20,7 @@ const comDetails = {
       title: "မြန်မာဌာန",
       name: "articles",
       url: "https://www.rfa.org/burmese",
-      rss "https://www.rfa.org/burmese/rss2.xml"
+      rss: "https://www.rfa.org/burmese/rss2.xml"
     },
     {
       title: "သတင်းများ",
@@ -34,97 +37,48 @@ const comDetails = {
   ],
 };
 
-
-/** @interface */
-class Article {
-  /**
-   * @params {object}
-   */
-  constructor(item) {
-    this.id = item.id || undefined;
-    this.content = item.content || undefined;
-    this.image = item.image || undefined;
-    this.link = item.link || undefined;
-    this.timestamp = item.timestamp || undefined;
-    this.title = item.title || undefined
-    this.source = item && item.source || undefined;
-    this.caption = item.caption || null;
-    this.message_id = item.message_id || null;
-    this.photo_id = item.photo_id || null;
-    this.post_id = item.post_id || null;
-    this.video_id = item.video_id || null;
-  }
-}
-
-
-/** @interface */
-class ArticleContent {
-  /**
-   * @params {object}
-   */
-  constructor(item) {
-    this.content = item.content;
-    this.youtube_id = item.youtube_id;
-  }
-  
-  get hasVideo() {
-    return Boolean(this.youtube_id);
-  }
-}
-
-/**
- * Get RSS Feed for asyncornously in `XML` format
- * 
- * @private
- * @params {string} url
- * @returns {!Promise<object>}
- */
-function getRSSFeed(url) {
-  const parseOptions = {
-      attributeNamePrefix: "",
-      attrNodeName: "attr",
-      textNodeName: "text",
-      trimValues: true,
-      parseAttributeValue: true,
-      ignoreAttributes: false,
-    };
-  return axios.get(url, { responseType: 'text' }).then(res => parse(res.data, parseOptions));
-}
-
 /**
  * @private
- * @params {string} content
- * @returns {string}
- */
-function removeWhitespace(content) {
-  return content.split("\n").map(p => p.trim()).filter(p => !!p).join("\n\n'));
-}
-
-/**
- * @private
- * @returns {!Array<object>}
+ * @returns {{
+ *  !Article[]: item
+ * }}
  */
 function fetchVideos() {
   let config = comDetails.feeds.find(({ name }) => name === 'videos');
-  return getRSSFeed(config.url).then(res => res.rss.item);
+  return getRSSFeed(config.rss).then(xml => xml.rss.channel);
 }
 
 /**
  * @private
- * @returns {!Array<object>}
+ * @returns {{
+ *  !Article[]: item
+ * }}
  */
 function fetchNews() {
   let config = comDetails.feeds.find(feed => feed.name === 'news');
-  return getRSSFeed(config.url).then(res => res.rss.item);
+  return getRSSFeed(config.rss).then(xml => xml.rss.channel);
 }
 
 /**
  * @private
- * @returns {!Array<object>}
+ * @returns {{
+ *  !Article[]: item
+ * }}
  */
 function fetchArticles() {
   let config = comDetails.feeds.find(feed => feed.name === 'articles');
-  return getRSSFeed(config.url).then(res => res.rss.item);
+  return getRSSFeed(config.rss).then(xml => xml.rss.channel);
+}
+
+async function fetchAll() {
+  const articles = (await fetchNews()).item.map(context => wrapArticle(context));
+  const videos = (await fetchVideos()).item.map(context => wrapArticle(context));
+  (await fetchArticles()).item.map(context => wrapArticle(context))
+    .forEach(context => context.hasVideo ? videos.push(context) : articles.push(context));
+  return {
+    articles: articles.filter(({ id }) => articles.find((article) => article.id !== id)),
+    videos: videos.filter(({ id }) => videos.find((video) => video.id !== id))
+  };
 }
 
 /**
@@ -137,14 +91,11 @@ function createContent(content) {
   let { window } = new JSDOM(content);
   let { document } = window;
   let videoFrame = document.querySelector("iframe");
-  
-  if (videoFrame instanceof HTMLElement) {
+  if (videoFrame) {
     youtube_id = videoFrame.src.split("/").pop();
     videoFrame.remove();
   }
-  
-  content = removeWhitespace(content.textContent);
-  
+  content = removeWhitespace(document.body.textContent);
   return new ArticleContent({
     content,
     youtube_id,
@@ -153,37 +104,35 @@ function createContent(content) {
 
 /**
  * @private
- * @params {string} date
- * @returns {number}
+ * @params {!{
+ *  object: item
+ * }}
+ * @returns {!{
+ *  string: id,
+ *  !Article: value,
+ *  boolean: hasVideo,
+ *  string?: youtube_id,
+ * }}
  */
-function publishedDate(datetime) {
-  return new Date(datetime || Date.now).getTime();
-}
-
-/**
- * @private
- * @params {object} item
- * @returns {!Article}
- */
-function wrapArticle(item) {
-  let id = (Date.now() - 1600000000000).toString();
-  let { content, isVideo, youtube_id } = createContent(item["content:encoded"].text);
-  let media = item["media:content"] || {};
+function wrapArticle(context) {
+  let id = context.guid.text?.split("/").pop().split(".html")[0].match(/(\d+)$/)[1];
+  let media = context["media:content"] || {};
   let image = media.attr?.url || comDetails.images.thumbnail;
   let caption = media['media:description'] && media['media:description'].text;
+  let content = createContent(context["content:encoded"].text);
 
   return {
     id,
-    isVideo,
-    youtube_id,
+    hasVideo: content.hasVideo,
+    youtube_id: content.youtube_id,
     value: new Article({
       id,
-      title: item.title.trim(),
-      content: undefined,
-      image: ,
-      link: item["link"],
+      title: context.title.trim(),
+      content: content.content,
+      image,
+      link: context["link"],
       source: comDetails.name,
-      timestamp: publishedDate(item.pubDate),
+      timestamp: publishedDate(context.pubDate),
       caption,
       video_id: null,
       message_id: null,
@@ -191,20 +140,6 @@ function wrapArticle(item) {
       post_id: null,
     }),
   };
-}
-
-/**
- * @export
- */
-async function fetchAll() {
-  const articles = (await fetchNews()).map(context => wrapArticle(context));
-  const videos = (await fetchVideos()).map(context => wrapArticle(context));
-  
-  (await fetchAll()).map(context => wrapArticle(context)).forEach(article => 
-    article.isVideo ? videos.push(context) : articles.push(context)
-  );
-  
-  return { articles, videos };
 }
 
 exports.fetchAll = fetchAll;
