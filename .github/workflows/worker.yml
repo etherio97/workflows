@@ -18,7 +18,7 @@ jobs:
         run: npm install
       - name: Executing "worker.js"
         run: |
-          node workers.js
+          node worker.js
           git config user.email ethereal97@gmail.com
           git config user.name  skmetheloper
           git add .
