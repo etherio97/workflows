@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "axios": "^0.21.1",
-    "fast-xml-parser": "^3.19.0",
+    "fast-xml-parser": "^3.21.1",
     "is-zawgyi": "^1.0.3",
     "jsdom": "^16.6.0",
     "linkedom": "^0.9.2",
