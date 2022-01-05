@@ -1,0 +1,33 @@
+name: Generate Pages
+on:
+  workflow_dispatch:
+    inputs:
+
+# schedule:
+#   - cron: "* * * * *"
+jobs:
+  runner:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: FedericoCarboni/setup-ffmpeg@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+        id: setup-ffmpeg
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 14.16.0
+      - name: Installing Packages
+        run: yarn
+      - name: Git Confugure
+        run: |
+          git config user.name worker-runner
+          git config user.email etherio97@user.noreply.github.com
+          git checkout --orphan gh-page
+      - name: Running worker threat
+        run: node worker.js
+      - name: Publish Changes
+        run: |
+          git add .
+          git commit -m "Updated at $(date)"
+          git push -f origin gh-page
