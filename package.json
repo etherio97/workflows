@@ -17,7 +17,7 @@
     "fast-xml-parser": "^3.19.0",
     "is-zawgyi": "^1.0.3",
     "jsdom": "^16.6.0",
-    "linkedom": "^0.9.2",
+    "linkedom": "^0.14.4",
     "moment-timezone": "^0.5.33",
     "rabbit-node": "^1.0.4",
     "ytdl-core": "^4.8.2"
